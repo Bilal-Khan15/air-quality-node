@@ -1,0 +1,11 @@
+{
+    "api": "http://api.airvisual.com/v2/nearest_city",
+    "apiKey": "96a901b6-fd6b-4973-868b-d0fe3de755ab",
+    "localhost": "http://127.0.0.1:3000",
+    "db": "mongodb://127.0.0.1:27017/yassir",
+    "port": "3000",
+    "defaultLongitude": "2.352222",
+    "defaultLatitude": "48.856613",
+    "defaultCity": "paris"
+  }
+  
