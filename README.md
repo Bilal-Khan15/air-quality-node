@@ -4,6 +4,7 @@ Building REST API using Node Js.
 ## Introduction
 
 This project is the backend of Air Quality to create a REST API responsible for exposing “the air quality information” of a nearest city to GPS coordinates using iqair :
+
 https://www.iqair.com/fr/commercial/air-quality-monitors/airvisual-platform/api
 
 This is the implementation of Air Quality in Node.js.
@@ -35,7 +36,8 @@ This will launch the Node server on port 3000. If that port is busy, you can set
 Open up your browser and head over to:
 
 http://localhost:3000/api/pollution?lat=5&lon=8
-params: longitude, latitude.
+
+(params: longitude, latitude)
 
 You should get “air quality “ for the given zone. That confirms that you have set up everything successfully.
 
