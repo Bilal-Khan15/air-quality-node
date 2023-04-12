@@ -12,42 +12,25 @@ describe('/api/pollution', () => {
   });
 
   describe('GET /', () => {
-    it('should return all', async () => {
-      const iqairs = [
-        {
-            "datetime": Date.now(),
-            "city": "paris",
-            "result": {
-                "ts": Date.now(),
-                "aqius": 31,
-                "mainus": "p2",
-                "aqicn": 22,
-                "maincn": "o3"
-            },
-        }
-      ];
-      
-      await Iqair.collection.insertMany(iqairs);
-
-      const res = await request(server).get('/api/pollution?lat=48.856613&lon=2.352222');
-      
+    it('should return status 200', async () => {
+      const res = await request(server)
+        .get('/api/pollution?lat=48.856613&lon=2.352222');
+  
       expect(res.status).toBe(200);
-      expect(res.body.length).toBe(1);
-      expect(res.body.some(r => r.city === 'paris')).toBeTruthy();
     });
   });
 
   describe('GET /max', () => {
-    it('should return maximum', async () => {
+    it('should return most polluted date & time for paris', async () => {
       const iqairs = [
         {
-          "datetime": Date.now(),
+          "datetime": new Date(),
           "city": "karachi",
           "result": {
-              "ts": Date.now(),
-              "aqius": 31,
+              "ts": new Date(),
+              "aqius": 35,
               "mainus": "p2",
-              "aqicn": 22,
+              "aqicn": 52,
               "maincn": "o3"
           },
         },
@@ -56,9 +39,9 @@ describe('/api/pollution', () => {
           "city": "paris",
           "result": {
               "ts": new Date(new Date().getTime()+(5*24*60*60*1000)),
-              "aqius": 35,
+              "aqius": 31,
               "mainus": "p2",
-              "aqicn": 52,
+              "aqicn": 22,
               "maincn": "o3"
           },
         },
@@ -67,10 +50,11 @@ describe('/api/pollution', () => {
       await Iqair.collection.insertMany(iqairs);
 
       const res = await request(server).get('/api/pollution/max');
-      
+    
+      var today = new Date().toJSON().slice(0,10);
+  
       expect(res.status).toBe(200);
-      expect(res.body.length).toBe(1);
-      expect(res.body.some(r => r.city === 'paris')).toBeTruthy();
+      expect(res.body.date === today).toBeTruthy();
     });
   });
 

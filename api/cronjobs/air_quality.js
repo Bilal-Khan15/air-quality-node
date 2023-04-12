@@ -5,22 +5,10 @@ const config = require('config');
 
 module.exports =  async (req, res) =>  {
     try {
-        const response = await axios.get(
-            config.get('localhost').concat("/api/pollution"),
-            {
-                params: {
-                    "lon": config.get('defaultLongitude'),
-                    "lat": config.get('defaultLatitude')
-                }
-            }
+        const response = await axios.post(
+            config.get('localhost').concat("/api/pollution")
         );
-        let iqair = new Iqair({
-            datetime: Date.now(),
-            city: config.get('defaultCity'),
-            result: _.pick(response.data.Result.pollution, ["ts", "aqius", "mainus", "aqicn", "maincn"])
-        });
-        iqair = await iqair.save();
-        console.log(iqair);
+        console.log(response.data);
     }
     catch (error) {
         if (error.response) {

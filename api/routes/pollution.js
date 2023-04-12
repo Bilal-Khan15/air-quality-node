@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
@@ -7,17 +8,8 @@ const config = require('config');
 
 router.get('/', async (req, res) => {
     try {
-        const response = await axios.get(
-            config.get('api'),
-            {
-                params: {
-                    lat :req.query.lat,
-                    lon: req.query.lon,
-                    key: config.get('apiKey')
-                }
-            }
-        );
-        const body = response.data;
+        const body = await getAqi(req.query.lat, req.query.lon);
+
         res.send({
             "Result": {
                 "pollution": body.data.current.pollution
@@ -37,8 +29,9 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/max', async (req, res) => {
-    const aqius = await Iqair.findOne({city: config.get('defaultCity')}).select('datetime -_id').sort('-result.aqius').limit(1);
-    const dateTime = new Date(aqius.datetime).toISOString().split("T")
+    const aqius = await Iqair.find({}).sort({ 'result.aqius': -1 }).limit(1).then(aqi => aqi[0].datetime);
+    
+    const dateTime = new Date(aqius).toISOString().split("T")
 
     res.send({
         "date": dateTime[0],
@@ -46,33 +39,46 @@ router.get('/max', async (req, res) => {
     });
 });
 
-router.post("/", [validate(validateIqair)], async (req, res) => {
+router.post("/", async (req, res) => {
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
    
-    iqair = new Iqair(_.pick(req.body, ["datetime", "city", "result"]))
-        .select('datetime -_id')
-        .sort('-result.aqius')
-        .limit(1);
-    await iqair.save();
-  
-    res
-      .send(_.pick(iqair, ["_id", "datetime", "email", "result"]));
+    try {
+        const response = await getAqi(config.get('defaultLatitude'), config.get('defaultLongitude'));
+
+        let iqair = new Iqair({
+            datetime: Date.now(),
+            city: config.get('defaultCity'),
+            result: _.pick(response.data.current.pollution, ["ts", "aqius", "mainus", "aqicn", "maincn"])
+        });
+        await iqair.save();
+    
+        res
+        .send(_.pick(iqair, ["_id", "datetime", "city", "result"]));
+    }
+    catch (error) {
+        if (error.response) {
+            console.log("ERROR: air quality not saved / ErrorCode: " + error.response.status);
+        } else{
+            console.log("WARNNING: Request Error air quality");
+        }
+    }
+
 });
 
-function validateIqair(req) {
-    const schema = {
-        datetime: Joi.date()
-            .required(),
-        city: Joi.string()
-            .min(2)
-            .max(50)
-            .required(),
-        result: Joi.object
-            .required()
-    };
-  
-    return Joi.validate(iqair, schema);
+async function getAqi(latitude, longitude) {
+    const response = await axios.get(
+        config.get('api'),
+        {
+            params: {
+                lat: latitude,
+                lon: longitude,
+                key: config.get('apiKey')
+            }
+        }
+    );
+
+    return response.data;
 }
 
 module.exports = router;
