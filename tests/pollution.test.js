@@ -60,49 +60,25 @@ describe('/api/pollution', () => {
 
   describe('POST /', () => {
 
-    let token; 
-    let name; 
+    let lat; 
+    let lon; 
 
     const exec = async () => {
       return await request(server)
         .post('/api/pollution')
-        .send({ datetime, city, result });
+        .send({ lat, lon });
     }
 
     beforeEach(() => {
-      datetime = Date.now();
-      city = 'paris';
-      result = {
-        ts: Date.now(),
-        aqius: 31,
-        mainus: "p2",
-        aqicn: 22,
-        maincn: "o3"
-      }
+      lat = 48.856613;
+      lon = 2.352222;
     })
 
-    it('should return 400 if data is invalid', async () => {
-      city = ''; 
-
+    it('should return the iqair if it is valid', async () => {
       const res = await exec();
 
-      expect(res.status).toBe(400);
-    });
-
-    it('should return 400 if city is less than 2 characters', async () => {
-      city = '1'; 
-      
-      const res = await exec();
-
-      expect(res.status).toBe(400);
-    });
-
-    it('should return 400 if genre is more than 50 characters', async () => {
-      city = new Array(52).join('a');
-
-      const res = await exec();
-
-      expect(res.status).toBe(400);
+      expect(res.body).toHaveProperty('result');
+      expect(res.body).toHaveProperty('city', 'paris');
     });
 
     it('should save the iqair if it is valid', async () => {
@@ -111,13 +87,6 @@ describe('/api/pollution', () => {
       const iqair = await Iqair.find({ city: 'paris' });
 
       expect(iqair).not.toBeNull();
-    });
-
-    it('should return the iqair if it is valid', async () => {
-      const res = await exec();
-
-      expect(res.body).toHaveProperty('result');
-      expect(res.body).toHaveProperty('city', 'paris');
     });
   });
 });

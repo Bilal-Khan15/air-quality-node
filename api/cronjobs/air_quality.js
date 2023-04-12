@@ -6,7 +6,11 @@ const config = require('config');
 module.exports =  async (req, res) =>  {
     try {
         const response = await axios.post(
-            config.get('localhost').concat("/api/pollution")
+            config.get('localhost').concat("/api/pollution"),
+            {
+                lat: config.get('defaultLatitude'),
+                lon: config.get('defaultLongitude')
+            }
         );
         console.log(response.data);
     }
